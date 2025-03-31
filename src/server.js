@@ -10,6 +10,8 @@ import { logger } from './middlewares/logger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
+import { UPLOAD_DIR } from './constants/contacts.js';
+
 dotenv.config();
 
 export function setupServer() {
@@ -34,6 +36,8 @@ export function setupServer() {
   app.use(notFoundHandler);
 
   app.use(errorHandler);
+
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
   const PORT = Number(env('PORT', 3000));
 

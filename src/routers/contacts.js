@@ -15,6 +15,9 @@ import {
   createContactSchema,
   updateContactSchema,
 } from '../validation/contacts.js';
+import { upload } from '../middlewares/multer.js';
+import { checkRoles } from '../middlewares/checkRoles.js';
+import { ROLES } from '../constants/roles.js';
 
 const router = Router();
 
@@ -24,18 +27,24 @@ router.get('/', ctrlWrapper(getContactsController));
 router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
 router.post(
   '/',
+  checkRoles(ROLES.FRIEND),
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
 router.patch(
   '/:contactId',
+  checkRoles(ROLES.FRIEND, ROLES.PARENT),
   isValidId,
+  upload.single('photo'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
 router.put(
   '/:contactId',
+  checkRoles(ROLES.FRIEND),
   isValidId,
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(upsertContactController),
 );

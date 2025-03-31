@@ -11,7 +11,7 @@ import { sortByList } from '../db/models/contact.js';
 import { parseSortParams } from '../utils/parsSortParams.js';
 import { parseContactFilterParams } from '../utils/parseContactFilterParams.js';
 
-export const getContactsController = async (req, res, next) => {
+export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query, sortByList);
   const filter = parseContactFilterParams(req.query);
