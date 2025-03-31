@@ -36,13 +36,13 @@ router.post('/refresh', ctrlWrapper(refreshSessionController));
 router.post('/logout', ctrlWrapper(logoutController));
 
 router.post(
-  '/send-reset-email',
+  '/request-reset-email',
   validateBody(requestResetEmailSchema),
   ctrlWrapper(requestResetEmailController),
 );
 
 router.post(
-  '/reset-pwd',
+  '/reset-password',
   validateBody(resetPasswordSchema),
   ctrlWrapper(resetPasswordController),
 );

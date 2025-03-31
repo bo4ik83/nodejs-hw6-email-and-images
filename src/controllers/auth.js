@@ -69,21 +69,20 @@ export async function logoutController(req, res) {
   res.status(204).send();
 }
 
-export async function requestResetEmailController(req, res) {
+export const requestResetEmailController = async (req, res) => {
   await requestResetToken(req.body.email);
   res.json({
     message: 'Reset password email was successfully sent!',
     status: 200,
     data: {},
   });
-}
+};
 
-export async function resetPasswordController(req, res) {
+export const resetPasswordController = async (req, res) => {
   await resetPassword(req.body);
-
   res.json({
-    status: 200,
     message: 'Password was successfully reset!',
+    status: 200,
     data: {},
   });
-}
+};

@@ -2,6 +2,7 @@ import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
+import { SMTP, TEMPLATES_DIR } from '../constants/index.js';
 import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
@@ -14,8 +15,8 @@ import {
 } from '../constants/users.js';
 
 import { env } from '../utils/env.js';
-import { sendEmail } from '../utils/sendEmail.js';
-import { TEMPLATES_DIR } from '../constants/email.js';
+import { sendEmail } from '../utils/sendMail.js';
+// import { TEMPLATES_DIR } from '../constants/email.js';
 
 export async function register(payload) {
   const { email, password } = payload;
@@ -87,7 +88,7 @@ function createSession() {
   };
 }
 
-export async function requestResetToken(email) {
+export const requestResetToken = async (email) => {
   const user = await UsersCollection.findOne({ email });
   if (!user) {
     throw createHttpError(404, 'User not found');
@@ -97,7 +98,7 @@ export async function requestResetToken(email) {
       sub: user._id,
       email,
     },
-    env('JWT_SECRET'),
+    env('JWT_ACCESS_SECRET'),
     {
       expiresIn: '15m',
     },
@@ -108,7 +109,9 @@ export async function requestResetToken(email) {
     'reset-password-email.html',
   );
 
-  const templateSource = await fs.readFile(resetPasswordTemplatePath, 'utf-8');
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
 
   const template = handlebars.compile(templateSource);
   const html = template({
@@ -117,18 +120,18 @@ export async function requestResetToken(email) {
   });
 
   await sendEmail({
-    from: env('SMTP_FROM'),
+    from: env(SMTP.SMTP_FROM),
     to: email,
     subject: 'Reset your password',
     html,
   });
-}
+};
 
-export async function resetPassword(payload) {
+export const resetPassword = async (payload) => {
   let entries;
 
   try {
-    entries = jwt.verify(payload.token, env('JWT_SECRET'));
+    entries = jwt.verify(payload.token, env('JWT_ACCESS_SECRET'));
   } catch (error) {
     if (error instanceof Error) throw createHttpError(401, error.message);
     throw error;
@@ -147,4 +150,4 @@ export async function resetPassword(payload) {
     { _id: user._id },
     { password: encryptedPassword },
   );
-}
+};

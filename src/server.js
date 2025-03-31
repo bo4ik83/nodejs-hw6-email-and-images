@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -9,6 +10,8 @@ import { logger } from './middlewares/logger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
+dotenv.config();
+
 export function setupServer() {
   const app = express();
   app.use(express.json());
@@ -17,6 +20,15 @@ export function setupServer() {
   app.use(cookieParser());
 
   app.use('/auth', authRouter);
+  app.get('/reset-password', (req, res) => {
+    res.status(405).json({
+      status: 405,
+      message: 'Method Not Allowed',
+      data: {
+        message: 'Use POST request to /auth/reset-pwd',
+      },
+    });
+  });
   app.use('/contacts', contactsRouter);
 
   app.use(notFoundHandler);
