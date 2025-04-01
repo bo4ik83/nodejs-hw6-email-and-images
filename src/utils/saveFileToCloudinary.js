@@ -1,18 +1,28 @@
+import fs from 'fs/promises';
 import cloudinary from 'cloudinary';
-import fs from 'node:fs/promises';
 
-import { env } from './env.js';
-import { CLOUDINARY } from '../constants/index.js';
-
-cloudinary.v2.config({
-  secure: true,
-  cloud_name: env(CLOUDINARY.CLOUD_NAME),
-  api_key: env(CLOUDINARY.API_KEY),
-  api_secret: env(CLOUDINARY.API_SECRET),
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const saveFileToCloudinary = async (file) => {
-  const response = await cloudinary.v2.uploader.upload(file.path);
-  await fs.unlink(file.path);
-  return response.secure_url;
+const saveFileToCloudinary = async (file) => {
+  try {
+    const result = await cloudinary.v2.uploader.upload(file.path);
+
+    try {
+      await fs.access(file.path);
+      await fs.unlink(file.path);
+    } catch (err) {
+      console.error(`Error deleting file from tmp: ${err.message}`);
+    }
+
+    return result.secure_url;
+  } catch (error) {
+    console.error('Error uploading file to Cloudinary:', error.message);
+    throw error;
+  }
 };
+
+export default saveFileToCloudinary;

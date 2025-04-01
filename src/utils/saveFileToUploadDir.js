@@ -1,13 +1,16 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
+import path from 'path';
+import fs from 'fs/promises';
 import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from '../constants/index.js';
-import { env } from './env.js';
 
-export const saveFileToUploadDir = async (file) => {
-  await fs.rename(
-    path.join(TEMP_UPLOAD_DIR, file.filename),
-    path.join(UPLOAD_DIR, file.filename),
-  );
+const saveFileToUploadDir = async (file) => {
+  await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
-  return `${env('APP_DOMAIN')}/uploads/${file.filename}`;
+  const srcPath = path.join(TEMP_UPLOAD_DIR, file.filename);
+  const destPath = path.join(UPLOAD_DIR, file.filename);
+
+  await fs.rename(srcPath, destPath);
+
+  return destPath;
 };
+
+export default saveFileToUploadDir;
